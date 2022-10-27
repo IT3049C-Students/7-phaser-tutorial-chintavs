@@ -1,4 +1,4 @@
-var config 
+var config, gameSettings
 
 window.onload = function () {
     config = {
@@ -14,6 +14,10 @@ window.onload = function () {
             }
         }
     } 
+
+    gameSettings = {
+        playerSpeed: 200
+    }
     var game = new Phaser.Game(config);
     
 }
