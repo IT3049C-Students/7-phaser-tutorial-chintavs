@@ -28,7 +28,8 @@ class Scene2 extends Phaser.Scene {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player.setCollideWorldBounds(true);
 
-        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.projectiles = this.add.group();
 
         // this.powerUps = this.physics.add.group();
 
@@ -69,13 +70,18 @@ class Scene2 extends Phaser.Scene {
         // this.moveShip(this.ship1, 1);
         // this.moveShip(this.ship2, 2);
         // this.moveShip(this.ship3, 3);
+        var beams = [];
 
         this.background.tilePositionY -= 0.5;
 
         this.movePlayerManager();
 
         if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-            console.log("Fire!")
+            beams.push(this.shootBeam())
+        }
+
+        for (var i = 0; i < beams.length; i++) {
+            beams[i].update();
         }
     }
 
@@ -90,6 +96,8 @@ class Scene2 extends Phaser.Scene {
     // }
 
     movePlayerManager() {
+        this.player.setVelocity(0);
+
         if (this.cursorKeys.left.isDown) {
             this.player.setVelocityX(-gameSettings.playerSpeed)
         } else if (this.cursorKeys.right.isDown) {
@@ -101,5 +109,10 @@ class Scene2 extends Phaser.Scene {
         } else if (this.cursorKeys.down.isDown) {
             this.player.setVelocityY(gameSettings.playerSpeed)
         }
+    }
+
+    shootBeam() {
+        var beam = new Beam(this)
+        return beam;
     }
 }
