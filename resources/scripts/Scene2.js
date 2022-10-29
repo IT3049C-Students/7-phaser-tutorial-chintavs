@@ -68,7 +68,6 @@ class Scene2 extends Phaser.Scene {
         this.input.on('gameobjectdown', this.destroyShip, this);
     }
 
-    
     update () {
         this.moveShip(this.ship1, 1);
         this.moveShip(this.ship2, 2);
@@ -79,7 +78,9 @@ class Scene2 extends Phaser.Scene {
         this.movePlayerManager();
 
         if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+          if (this.player.active) {
             this.shootBeam();
+          }
         }
         
         for (var i = 0; i < this.projectiles.getChildren().length; i++) {
@@ -87,6 +88,7 @@ class Scene2 extends Phaser.Scene {
           beam.update();
         }
     }
+
     moveShip(ship, speed) {
         ship.y += speed;
         if (ship.y > config.height) {
@@ -95,8 +97,26 @@ class Scene2 extends Phaser.Scene {
     }
 
     resetShipPos(ship) {
-          ship.y = 0;
+        ship.y = 0;
         ship.x = Phaser.Math.Between(0, config.width);
+    }
+
+    resetPlayer() {
+      var x = config.width / 2 - 8;
+      var y = config.height + 64;
+      this.player.enableBody(true, x, y, true, true);
+      this.player.alpha = 0.5;
+
+      var tween = this.tweens.add({
+        targets: this.player,
+        y: config.height - 64,
+        ease: 'Power1',
+        duration: 1500,
+        onComplete: function() {
+          this.player.alpha = 1
+        },
+        callbackScope:this
+      })
     }
 
     destroyShip(pointer, gameObject) {
@@ -130,27 +150,31 @@ class Scene2 extends Phaser.Scene {
     }
 
     hurtPlayer(player, enemy) {
+      if (this.player.alpha < 1) {
+        return;
+      }
+      
       this.resetShipPos(enemy);
-      player.x = config.width / 2 - 8;
-      player.y = config.height - 64;
+
+      var explosion = new Explosion(this, player.x, player.y);
+
+      player.disableBody(true, true);
+
+      this.time.addEvent( {
+        delay: 1000,
+        callback: this.resetPlayer,
+        callbackScope: this,
+        loop: false
+      })
     }
   
     hitEnemy(projectile, enemy) {
-      projectile.stop();
-      projectile.setTexture("explode");
-      projectile.play("explode");
-
+      var explosion = new Explosion(this, enemy.x, enemy.y);
+      projectile.destroy();
       this.resetShipPos(enemy);
-
       this.score += 15;
-      var scoreFormatted = this.zeroPad(this.score, 6)
-      this.scoreLabel.text = "SCORE " + scoreFormatted;
-
-      setTimeout(function () {
-        projectile.destroy();
-      }, 200)
-      
-      
+       var scoreFormated = this.zeroPad(this.score, 6);
+       this.scoreLabel.text = "SCORE " + scoreFormated;
     }
 
     addHUD() {

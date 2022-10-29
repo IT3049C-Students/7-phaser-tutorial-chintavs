@@ -19,8 +19,4 @@ class Beam extends Phaser.GameObjects.Sprite{
       this.destroy();
     }
   }
-
-  stop () {
-    this.body.velocity.y = 0;
-  }
 }
