@@ -4,6 +4,7 @@ class Scene2 extends Phaser.Scene {
     }
 
     create() {
+        this.score = 0;
         this.background = this.add.tileSprite(0,0,config.width,config.height,"background")
         this.background.setOrigin(0,0)
 
@@ -51,10 +52,8 @@ class Scene2 extends Phaser.Scene {
             powerUp.setBounce(1);
         }
 
-        this.add.text(20, 20, "Playing game", {
-            font: "25px Arial", 
-            fill: "yellow"
-        });
+        this.addHUD();
+        this.scoreLabel = this.add.bitmapText(10, 5, "pixelFont", "SCORE 000000", 16)
 
         this.physics.add.collider(this.projectiles, this.powerUps, function(projectile, powerUp) {
           projectile.destroy();
@@ -137,7 +136,41 @@ class Scene2 extends Phaser.Scene {
     }
   
     hitEnemy(projectile, enemy) {
-      projectile.destroy();
+      projectile.stop();
+      projectile.setTexture("explode");
+      projectile.play("explode");
+
       this.resetShipPos(enemy);
+
+      this.score += 15;
+      var scoreFormatted = this.zeroPad(this.score, 6)
+      this.scoreLabel.text = "SCORE " + scoreFormatted;
+
+      setTimeout(function () {
+        projectile.destroy();
+      }, 200)
+      
+      
+    }
+
+    addHUD() {
+      var graphics = this.add.graphics();
+      graphics.fillStyle(0x000000, 1);
+      graphics.beginPath();
+      graphics.moveTo(0, 0);
+      graphics.lineTo(config.width, 0);
+      graphics.lineTo(config.width, 20);
+      graphics.lineTo(0, 20);
+      graphics.lineTo(0, 0);
+      graphics.closePath();
+      graphics.fillPath();
+    }
+
+    zeroPad(number, size){ 
+      var stringNumber = String(number);
+      while(stringNumber.length < (size || 2)){
+        stringNumber = "0" + stringNumber;
+      }
+      return stringNumber;
     }
 }
